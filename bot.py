@@ -31,13 +31,13 @@ async def send_welcome(message):
 async def send_help(message):
 	await bot.send_message(message.chat.id, config.help_message, reply_markup=config.help_keyboard)
 	
-@dp.message_handler(commands=['about'])
+@dp.message_handler(commands=['empty'])
 async def send_about(message):
 	await bot.send_message(message.chat.id, config.about_message, reply_markup=config.about_keyboard)
 
 @dp.message_handler(commands=['donate'])
 async def send_about(message):
-	await bot.send_message(message.chat.id, config.donate_message, reply_markup=config.donate_keyboard)
+	await bot.send_message(message.chat.id, config.donate_key_message, reply_markup=config.donate_keyboard)
 	
 
 @dp.message_handler(content_types=['text'])
@@ -45,7 +45,7 @@ async def save_msg(message):
 	if message.text in config.keys:
 		sql.reg_user(c, message.from_user.id)
 		conn.commit()
-		await bot.send_message(message.chat.id, 'Вы зарегистрированны')
+		await bot.send_message(message.chat.id, 'Лицензионный ключ активирован. Авто-ссобщение отключено.')
 		return
 
 	keyboard = types.inline_keyboard.InlineKeyboardMarkup()
@@ -64,7 +64,7 @@ async def send(query):
 	text = sql.get_message(c, query.query)[1]
 	keyboard = types.inline_keyboard.InlineKeyboardMarkup()
 	keyboard.insert(types.inline_keyboard.InlineKeyboardButton(
-		text='Интересно', callback_data=f'yes,{user_id}'))
+		text='Интересно!', callback_data=f'yes,{user_id}'))
 	keyboard.insert(types.inline_keyboard.InlineKeyboardButton(
 		text='Не интересно', callback_data=f'no,{user_id}'))
 	message = types.input_message_content.InputTextMessageContent(text)
@@ -86,17 +86,17 @@ async def answer(query):
 	user = sql.get_user(c, user_id)
 	if not user[4]:
 		await bot.send_message(
-			user_id, config.donate_message, reply_markup=config.donate_keyboard)
+			user_id, config.donate_message, reply_markup=config.autodonate_keyboard)
 	if answer == 'yes':
 		await bot.send_message(
 			user_id,
-			f'Ответ от [{query.from_user.first_name}](tg://user?id={query.from_user.id})',
+			f'@PocketHelperBot: Ответ от [{query.from_user.first_name}](tg://user?id={query.from_user.id})',
 			parse_mode='markdown')
 		await bot.send_sticker(user_id, yes_sticker.file_id)
 	else:
 		await bot.send_message(
 			user_id,
-			f'Ответ от [{query.from_user.first_name}](tg://user?id={query.from_user.id})',
+			f'@PocketHelperBot: Ответ от [{query.from_user.first_name}](tg://user?id={query.from_user.id})',
 			parse_mode='markdown')
 		await bot.send_sticker(user_id, no_sticker.file_id)
 	await query.answer('Ответ отправлен')
